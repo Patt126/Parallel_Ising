@@ -60,6 +60,7 @@ After entering the file path, the program will display an interactive menu:
 3. Plot Specific Heat
 4. Evaluate Critical Temperature
 5. Exit
+   
 Choose an option by entering the corresponding number. The program will execute the selected operation.
 
 
