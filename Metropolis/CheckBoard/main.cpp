@@ -58,8 +58,8 @@ int main() {
     std::cout << "Enter interaction strength: ";
     std::cin >> interactionStrength;
 
-    std::cout << "Enter number of threads \n"
-              << "(please for organization reason enter a perfect square and a number that allows covering the whole lattice in blocks): ";
+    std::cout << "Enter number of threads, number of blocks will be twice \n"
+              << "(please for organization reason enter a number of block that is a perfect square and a number that allows covering the whole lattice in blocks): ";
     std::cin >> NUMTHREAD;
 
     // Vector to store time results and sizes
