@@ -31,15 +31,15 @@ The lattice is divided into two alternating sublattices resembling a checkerboar
 
 ## Building and Running the Simulation
 Just move to the folder corresponding to a simulation method (autoconvergence or there are several inside metropolis).
-'''bash
+```bash
 cd path/to/folder
 make
 ./simulation
-'''
+```
 Simulation start, at the end file relative to performance and results are inside the same directory.
-'''bash
+```bash
 make clean 
-'''
+```
 To remove the executable.
 
 
