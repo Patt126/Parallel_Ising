@@ -7,7 +7,7 @@
 #include <chrono>
 #include <vector>
 #include <fstream>
-#include "Metropolis/DomainDecomposition/DomainDecomposition.h"
+#include "AutostopMontecarlo.h"
 
 /**
  * @brief Stores the performance results to a file.
@@ -33,7 +33,7 @@ void store_performance_to_file(std::vector<float> time_results, std::vector<int>
  */
 int main() {
     // User input variables
-    int L_MIN, L_MAX, NUMTHREAD;
+    int L_MIN, L_MAX, notFlipped;
     float T_MIN, T_MAX, T_STEP, interactionStrength;
     long int IT;
 
@@ -56,19 +56,18 @@ int main() {
     std::cout << "Enter interaction strength: ";
     std::cin >> interactionStrength;
 
-    std::cout << "Enter number of threads \n"
-              << "(please for organization reason enter a perfect square and a number that allows covering the whole lattice in blocks): ";
-    std::cin >> NUMTHREAD;
+    std::cout << "Enter  number of not flipped spin over total: ";
+    std::cin >> notFlipped;
 
     // Vector to store time results and sizes
     std::vector<float> time_results;
     std::vector<int> size;
-
+    float tolerance;
     // Serial Metropolis
     for (int L = L_MIN; L <= L_MAX; L *= 2) {
-        IT = pow(L, 4.4);
+        tolerance  = static_cast<float> (notFlipped/(L*L));
         std::cout << "Simulation start for L = " << L << std::endl;
-        DomainDecomposition simulation(interactionStrength, L, NUMTHREAD, T_MIN, T_MAX, T_STEP, IT);
+        AutostopMontecarlo simulation(interactionStrength, L, tolerance, T_MIN, T_MAX, T_STEP);
 
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -80,7 +79,7 @@ int main() {
 
         time_results.emplace_back(duration.count());
         size.emplace_back(L * L);
-        simulation.store_results_to_file();
+        simulation.store_result_to_file();
     }
 
     // Store performance results for Serial Metropolis
