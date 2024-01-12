@@ -63,7 +63,8 @@ After entering the file path, the program will display an interactive menu:
    
 Choose an option by entering the corresponding number. The program will execute the selected operation.
 
+## Note
 
-
+- The codes inside Metropolis directory are meant for benchmarking, for that reason they consider, for a given lattice widht L, a fixed number of iteration obtained as \(L^4.25\). This value is obtained from several trial with autostop algorithm, and provide an upper bound to the tipical number of convergence steps. For that reason, this implementation are much slower to autostopping one but are usefull to perform a deterministic simulation in terms of steps, in order to evaluate speed up. 
 
 
