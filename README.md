@@ -66,5 +66,5 @@ Choose an option by entering the corresponding number. The program will execute 
 ## Note
 
 - The codes inside Metropolis directory are meant for benchmarking, for that reason they consider, for a given lattice widht $L$, a fixed number of iteration obtained as $L^{4.25}$. This value is obtained from several trial with autostop algorithm, and provide an upper bound to the tipical number of convergence steps. For that reason, this implementation are much slower to autostopping one but are usefull to perform a deterministic simulation in terms of steps, in order to evaluate speed up. 
-
+- In parallel implementation, to optimize cuncurrent execution, the lattice is divided in a number of blocks corresponding to the number of thread.With the exclusion of checkboard in which ,considering the alternation of the two sublattice, the number of blocks is twice the number of threads. Be carefull when choosing the number of thread, remembering that it must be a perfect square in order to cover with square blocks a square lattice.   
 
