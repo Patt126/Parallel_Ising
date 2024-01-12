@@ -1,4 +1,4 @@
-## Benchmarking Strategies for Parallel 2D Ising Model Simulation     
+# Benchmarking Strategies for Parallel 2D Ising Model Simulation     
 This project implements the Ising model simulation using C++ and offers parallel computation using  OpenMP (for multicore CPUs),. It models the magnetic dipole moments of atomic "spins" on a lattice, simulating phase transitions in ferromagnetic materials.
 
 ## Features
@@ -12,12 +12,14 @@ This project implements the Ising model simulation using C++ and offers parallel
 - Convergence criterion implementation: exact solution comparison and fluctuation analisys.
 - Visualization
 
-## Parallel alghoritm
+# Parallel alghoritm
 
 ##Domain Decomposition
 The code implements a parallel Metropolis algorithm in which lattice is divided into blocks,. Unique to this approach is the use of atomic updates for boundary sites, ensuring thread safety and consistency during parallelized simulations.
+
 ##sliding window
 Lattice is divided into blocks, and it is implemented a Sliding Window Metropolis algorithm. In this approach, spins are updated only if they are not at block blundary. A periodic translation of the lattice matrix is performed, ensuring proper visiting and updates of boundary spins.
+
 ##checkboard
 The lattice is divided into two alternating sublattices resembling a checkerboard, and the simulation progresses by updating spins on each sublattice in alternating steps. 
 
