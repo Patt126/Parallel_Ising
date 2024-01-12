@@ -52,7 +52,9 @@ g++ -std=c++17 -o visualisation visualisation.cpp
 ./visualisation
 ```
 **Interactive Menu:**
+
 After entering the file path, the program will display an interactive menu:
+
 -Option 1: Plot Energy
 -Option 2: Plot Magnetization over Temperature
 -Option 3: Plot Specific Heat
