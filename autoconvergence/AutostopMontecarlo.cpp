@@ -1,11 +1,11 @@
-// MonteCarloSimulation.tpp
+// AutostopMontecarlo.tpp
 
 #include "AutostopMontecarlo.h"
 #include <cstdlib>
 #include <fstream>
 
 
-MonteCarloSimulation::MonteCarloSimulation(float interactionStrength, int latticeSize,  float Tolerance, float T_MIN, float T_MAX, float T_STEP):
+AutostopMontecarlo::AutostopMontecarlo(float interactionStrength, int latticeSize,  float Tolerance, float T_MIN, float T_MAX, float T_STEP):
      lattice(interactionStrength, latticeSize),  
         randVect(),
         energyResults(),
@@ -21,7 +21,7 @@ MonteCarloSimulation::MonteCarloSimulation(float interactionStrength, int lattic
 {   
     randVect = std::make_unique<std::vector<int> >(N);
     // Initialize randVect with createRandVect function
-    createRandVector();
+    create_rand_vector();
     // Initialize energyResults with std::make_unique       
     energyResults = std::make_unique<std::vector<float> >();
     // Initialize magnetizationResults with std::make_unique
@@ -34,12 +34,12 @@ MonteCarloSimulation::MonteCarloSimulation(float interactionStrength, int lattic
 }
 
 
-void MonteCarloSimulation::simulatePhaseTransition() {
+void AutostopMontecarlo::simulate_phase_transition() {
     int deltaE ;
     int deltaM ;
     int step;
     float m = 0;
-    float mExact = 1;
+    float mexact = 1;
     float T = T_MIN;
 
     float error = 0;
@@ -49,29 +49,29 @@ void MonteCarloSimulation::simulatePhaseTransition() {
         prob[0] = std::exp(-4 * lattice.getInteractionEnergy() / T);
         prob[1] = std::exp(-8 * lattice.getInteractionEnergy() / T);
         step = 0;
-        mExact = mexact(T); //evaluate exact solution
+        mexact = m_exact(T); //evaluate exact magnetization
         m = static_cast<float>(lattice.getMagnetization()) / N;
-        error = std::abs(std::abs(m) - mExact); //evaluate distance from the exact solution
-        while (error > tolerance ) { //untill the tollerance level is reached
+        error = std::abs(std::abs(m) - mexact); //evaluate error
+        while (error > tolerance ) { //continue simulation until convergence criterion is met 
             deltaE = 0;
             deltaM = 0; 
-            createRandVector();
-            simulateStep(prob, lattice.getLattice(), deltaM, deltaE);
+            create_rand_vector();
+            simulate_step(prob, lattice.getLattice(), deltaM, deltaE);
             lattice.incrementMagnetization(deltaM);
             lattice.incrementEnergy(deltaE);
             m = static_cast<float>(lattice.getMagnetization()) / N;
-            error = std::abs(std::abs(m) - mExact);
+            error = std::abs(std::abs(m) - mexact);
             step++;
         
         }
-
+        //record simulation results for the current temperature
         temperatures->emplace_back(T);
         T += T_STEP;
         monteCarloStepsResults->emplace_back(step);
         energyResults->emplace_back(1);
         magnetizationResults->emplace_back(abs(m));
         step = 0;
-        lattice.restoreRandomLattice();
+        lattice.restoreRandomLattice(); //restore the lattice to its initial state for the next temperature
     }
 }
 
@@ -79,7 +79,7 @@ void MonteCarloSimulation::simulatePhaseTransition() {
 
 
 
-void MonteCarloSimulation::flip(std::vector<int>& lattice, std::array<float, 2>& prob, int site, int& M, int& E) {
+void AutostopMontecarlo::flip(std::vector<int>& lattice, std::array<float, 2>& prob, int site, int& M, int& E) {
     int sum = 0;
 
     if (site < L) {
@@ -125,7 +125,7 @@ void MonteCarloSimulation::flip(std::vector<int>& lattice, std::array<float, 2>&
 }
 
 
-void MonteCarloSimulation::simulateStep(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E) {
+void AutostopMontecarlo::simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E) {
     for (unsigned long int i = 0; i < (N); i++) {
         int n = (*randVect)[i];
         if (n != -1) {
@@ -135,7 +135,7 @@ void MonteCarloSimulation::simulateStep(std::array<float, 2> prob, std::vector<i
 }
 
 
-void MonteCarloSimulation::storeResultsToFile() const {
+void AutostopMontecarlo::store_result_to_file() const {
     // Open the file for writing
     std::ofstream outFile("result_" + std::to_string(N) + ".txt");
 
