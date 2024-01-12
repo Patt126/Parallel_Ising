@@ -53,12 +53,12 @@ g++ -std=c++17 -o visualisation visualisation.cpp
 ```
 **Interactive Menu:**
 After entering the file path, the program will display an interactive menu:
-Option 1: Plot Energy
-Option 2: Plot Magnetization over Temperature
-Option 3: Plot Specific Heat
-Option 4: Evaluate Critical Temperature
-Option 0: Exit
-Choose an option by entering the corresponding number. The program will execute the selected operation.
+-Option 1: Plot Energy
+-Option 2: Plot Magnetization over Temperature
+-Option 3: Plot Specific Heat
+-Option 4: Evaluate Critical Temperature
+-Option 0: Exit
+-Choose an option by entering the corresponding number. The program will execute the selected operation.
 
 
 
