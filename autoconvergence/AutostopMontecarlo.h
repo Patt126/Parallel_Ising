@@ -3,6 +3,7 @@
 
 #include <array>
 #include <vector>
+#include <cmath>
 #include <memory>
 #include "AbstractMonteCarloSimulation.h"
 #include "SquareLattice.h"
