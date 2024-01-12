@@ -12,7 +12,7 @@ This project implements the Ising model simulation using C++ and offers parallel
 - Convergence criterion implementation: exact solution comparison and fluctuation analisys.
 - Visualization
 
-# Parallel alghoritm
+# Parallel Algorithm
 
 ## Domain Decomposition
 The code implements a parallel Metropolis algorithm in which lattice is divided into blocks,. Unique to this approach is the use of atomic updates for boundary sites, ensuring thread safety and consistency during parallelized simulations.
