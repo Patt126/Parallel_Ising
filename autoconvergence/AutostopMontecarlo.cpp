@@ -1,6 +1,6 @@
 // MonteCarloSimulation.tpp
 
-#include "MonteCarloSimulation.h"
+#include "AutostopMontecarlo.h"
 #include <cstdlib>
 #include <fstream>
 
@@ -49,10 +49,10 @@ void MonteCarloSimulation::simulatePhaseTransition() {
         prob[0] = std::exp(-4 * lattice.getInteractionEnergy() / T);
         prob[1] = std::exp(-8 * lattice.getInteractionEnergy() / T);
         step = 0;
-        mExact = mexact(T);
+        mExact = mexact(T); //evaluate exact solution
         m = static_cast<float>(lattice.getMagnetization()) / N;
-        error = std::abs(std::abs(m) - mExact);
-        while (error > tolerance ) {
+        error = std::abs(std::abs(m) - mExact); //evaluate distance from the exact solution
+        while (error > tolerance ) { //untill the tollerance level is reached
             deltaE = 0;
             deltaM = 0; 
             createRandVector();
