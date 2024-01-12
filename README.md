@@ -47,6 +47,7 @@ To remove the executable.
 
 
 ## Visualize Results
+
 ```bash
 g++ -std=c++17 -o visualisation visualisation.cpp
 ./visualisation
