@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <omp.h>
-#include <random>
+
 
 
 SerialMetropolis::SerialMetropolis(float interactionStrength, int latticeSize  , float T_MIN, float T_MAX, float T_STEP, long int IT)

@@ -9,6 +9,7 @@
 #include <array>
 #include <vector>
 #include <memory>
+#include <random>
 #include "../AbstractMonteCarloSimulation.h"
 #include "../../Lattice/SquareLattice.h"
 
