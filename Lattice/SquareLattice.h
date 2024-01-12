@@ -33,6 +33,11 @@ public:
     void print_lattice() const override;
 
     /**
+     * @brief Graph the lattice using Gnuplot.
+     */
+    //void graph_lattice() const;
+
+    /**
      * @brief Overrides the AbstractLattice function to evaluate the energy of the lattice.
      * @return The energy of the lattice as a floating-point value.
      */

@@ -1,4 +1,6 @@
 #include "SquareLattice.h"
+//#include <gnuplot-iostream.h>
+
 
 /**
  * @file SquareLattice.cpp
@@ -42,6 +44,41 @@ void SquareLattice::print_lattice() const {
     }
     std::cout << std::endl;
 }
+
+/*void graph_lattice() const {
+        // Open a pipe to Gnuplot
+        FILE* gp = popen("gnuplot -persist", "w");
+
+        // Check if the pipe is open
+        if (!gp) {
+            std::cerr << "Error: Unable to open a pipe to Gnuplot." << std::endl;
+            return;
+        }
+
+        // Write Gnuplot commands to the pipe
+        fprintf(gp, "set title 'Square Lattice'\n");
+        fprintf(gp, "set xrange [0:%d]\n", L);
+        fprintf(gp, "set yrange [0:%d]\n", L);
+        fprintf(gp, "unset xtics\n");
+        fprintf(gp, "unset ytics\n");
+        fprintf(gp, "set size square\n");
+        fprintf(gp, "plot '-' matrix with image notitle\n");
+
+        // Write lattice data to the pipe
+        for (int i = 0; i < L; ++i) {
+            for (int j = 0; j < L; ++j) {
+                fprintf(gp, "%d ", (*lattice)[i * L + j]);
+            }
+            fprintf(gp, "\n");
+        }
+
+        // End the Gnuplot plot command
+        fprintf(gp, "e\n");
+
+        // Close the pipe
+        fclose(gp);
+    }
+*/
 
 /**
  * @brief Overrides the AbstractLattice function to evaluate the energy of the lattice.
