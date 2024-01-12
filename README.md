@@ -14,13 +14,13 @@ This project implements the Ising model simulation using C++ and offers parallel
 
 # Parallel alghoritm
 
-##Domain Decomposition
+## Domain Decomposition
 The code implements a parallel Metropolis algorithm in which lattice is divided into blocks,. Unique to this approach is the use of atomic updates for boundary sites, ensuring thread safety and consistency during parallelized simulations.
 
-##sliding window
+## sliding window
 Lattice is divided into blocks, and it is implemented a Sliding Window Metropolis algorithm. In this approach, spins are updated only if they are not at block blundary. A periodic translation of the lattice matrix is performed, ensuring proper visiting and updates of boundary spins.
 
-##checkboard
+## checkboard
 The lattice is divided into two alternating sublattices resembling a checkerboard, and the simulation progresses by updating spins on each sublattice in alternating steps. 
 
 ## Prerequisites
