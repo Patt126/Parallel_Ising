@@ -7,10 +7,15 @@ This project implements the Ising model simulation using C++ and offers parallel
 - Serial computation with C++ with  Metropolis-Hastings alghoritm.
 -  parallel computation utilizing OpenMP with different parallelization techniques.
 - Configurable parameters such as lattice size, temperature range, and number of iterations.
+- Automated simulation specifying minimum and maximum lattice size. Allows to get performance and Physical results, stored in dedicated folders 
 - Analysis of physical properties like total energy, magnetization, correlation lenght and specific heat. Following their evolution with temperature around the critical one.
 - Performance evaluation for benchmarking with fixed number of iteration.
 - Convergence criterion implementation: exact solution comparison and fluctuation analisys.
 - Visualization
+
+## Update
+
+In the latest simulation, conducted on a high-performance computer equipped with a substantial number of cores, we were able to explore larger lattices. However, we observed that the approach of pre-storing and manipulating a fixed sequence of random numbers proved to be resource-intensive in terms of memory usage. Consequently, I reverted to a simpler strategy where a random number is generated on-the-fly when needed. While this incurs a higher computational cost, it significantly improves memory performance. In the code, I have ve preserved commented or unused sections from the previous implementation as a form of documentation to trace the development process.
 
 # Parallel Algorithm
 
@@ -32,9 +37,9 @@ The lattice is divided into two alternating sublattices resembling a checkerboar
 
 
 ## Building and Running the Simulation
-Just move to the folder corresponding to a simulation method (autoconvergence or there are several inside metropolis).
+The code is provided with a main program to execute a BenchMark of three of the four methods.
+To Build and run in the main directory:  
 ```bash
-cd path/to/folder
 make
 ./simulation
 ```
@@ -62,6 +67,7 @@ After entering the file path, the program will display an interactive menu:
 5. Exit
    
 Choose an option by entering the corresponding number. The program will execute the selected operation.
+
 
 ## Note
 
