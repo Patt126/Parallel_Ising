@@ -1,6 +1,7 @@
 
 #include "SerialMetropolis.h"
 #include <cstdlib>
+#include <cmath>
 #include <fstream>
 #include <omp.h>
 
@@ -25,9 +26,9 @@ SerialMetropolis::SerialMetropolis(float interactionStrength, int latticeSize  ,
 
     // Initialize RandVect with std::make_unique
     RandVect = std::make_unique<std::vector<int> >();
-    RandVect->reserve(IT);
+    RandVect->reserve(0);
     // Initialize rand_vect with create_rand_vect function
-    create_rand_vector();
+    //create_rand_vector();
     // Initialize EnergyResults with std::make_unique       
     EnergyResults = std::make_unique<std::vector<float> >();
     // Initialize MagnetizationResults with std::make_unique
@@ -133,7 +134,7 @@ void SerialMetropolis::flip(std::vector<int>& lattice, std::array<float, 2>& pro
 
 void SerialMetropolis::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset ) {
     for (unsigned long int i = 0; i < (IT);i++) {
-        int n = (*RandVect)[i];
+        int n = static_cast<int>(dist(rng) * L * L);
         flip(lattice, prob, n , M, E);
     }
 }
@@ -141,9 +142,9 @@ void SerialMetropolis::simulate_step (std::array<float, 2> prob, std::vector<int
 
 void SerialMetropolis::store_results_to_file() const {
 
-    std::string filePath = "results_serial/result_" + std::to_string(N) + ".txt";
+    std::string filePath = "./Results/Serial/Result_" + std::to_string(L) + ".txt";
     // Open the file for writing
-    std::ofstream outFile("result_" + std::to_string(N) + ".txt");
+    std::ofstream outFile(filePath);
 
     // Check if the file is open
     if (!outFile.is_open()) {

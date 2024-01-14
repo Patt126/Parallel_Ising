@@ -84,7 +84,7 @@ protected:
      * @param offset Offset for the starting point of each block.
      */
     void simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset) override;
-
+    void simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset,std::vector<int>& randVector_private);
     /**
      * @brief Translate the matrix in a sliding window manner.
      *

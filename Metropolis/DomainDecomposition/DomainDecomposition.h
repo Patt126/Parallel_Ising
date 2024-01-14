@@ -95,7 +95,7 @@ protected:
      * @param offset Offset for the starting point of each block.
      */
     void simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& magnetization, int& energy, int offset) override;
-
+    void simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset,std::vector<int>& randVector); 
     /**
      * @brief Set the block width for the domain decomposition.
      *

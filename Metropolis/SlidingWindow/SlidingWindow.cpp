@@ -1,5 +1,6 @@
 
 #include "SlidingWindow.h"
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <omp.h>
@@ -30,7 +31,7 @@ SlidingWindow::SlidingWindow(float interactionStrength, int latticeSize ,int NUM
     ThreadStart->resize(NUMTHREAD);
     // Initialize A with set_block_size function
     A = set_block_size();
-    NumSlide = ceil(L/2);
+    NumSlide = ceil(A/2);
     if (A == -1) {
     std::cerr << "Error: set_block_size failed\n";
     exit(EXIT_FAILURE);
@@ -65,6 +66,13 @@ void SlidingWindow::simulate_phase_transition() {
 
 #pragma omp parallel 
     {
+        
+        /*std::vector<int> randVector_private;
+
+        randVector_private.reserve(ceil(IT/(NUMTHREAD*NumSlide)));
+        #pragma omp barrier*/
+        
+    
         #pragma omp single nowait
         {
              while (T < T_MAX) {
@@ -80,6 +88,7 @@ void SlidingWindow::simulate_phase_transition() {
                     for(int taskNum = 0; taskNum < NUMTHREAD; taskNum++ ){
                         #pragma omp task  firstprivate(M_loc, E_loc) shared(deltaM,deltaE)
                         {
+                            //create_rand_vector(randVector_private, rng_private);
                             simulate_step(prob,lattice.get_lattice(), M_loc, E_loc, (*ThreadStart)[taskNum]);
                             #pragma omp atomic update
                             deltaM += M_loc;
@@ -229,12 +238,29 @@ void SlidingWindow::flip(std::vector<int>& lattice, std::array<float, 2>& prob, 
 // simulate the operation for one block freezing boundary flips
 void SlidingWindow::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset) {
     int n;
-    auto rng_private = std::make_unique<std::mt19937>(std::random_device{}());
-    auto randVector_private = std::make_unique<std::vector<int>>();
+    std::random_device rd;
+    std::mt19937 rng_private(rd());
+    std::uniform_int_distribution<int> dist_private(0, A - 1);
+    /*auto randVector_private = std::make_unique<std::vector<int>>();
     randVector_private->reserve(ceil(IT/(NUMTHREAD*NumSlide)));
-    create_rand_vector(*randVector_private, *rng_private);
+    create_rand_vector(*randVector_private, *rng_private);*/
+    int r ,c ;
+    for (unsigned long int i = 0; i < ceil((IT/NUMTHREAD));i++) {
+        int r = dist_private(rng_private);
+        int c = dist_private(rng_private);
+        
+        //if not boundary
+        if (r  != 0 && c != 0 && r != A-1 && c != A-1) {
+            n = r * L + c;
+            flip(lattice, prob, n + offset, M, E);
+            }
+    }
+}
+
+void SlidingWindow::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset,std::vector<int>& randVector_private) {
+    int n;
     for (unsigned long int i = 0; i < ceil(IT/(NUMTHREAD*NumSlide));i++) {
-        n = (*randVector_private)[i];
+        n = randVector_private[i];
         //if (not boundary) 
         if (n != -1){
             flip(lattice, prob, n + offset, M, E);
@@ -245,9 +271,9 @@ void SlidingWindow::simulate_step (std::array<float, 2> prob, std::vector<int>& 
 //store the results in a file
 void SlidingWindow::store_results_to_file() const {
 
-    std::string filePath = "results_SlidingWin/result_" + std::to_string(N) + ".txt";
+   std::string filePath = "./Results/Sliding/Result_" + std::to_string(L) + ".txt";
     // Open the file for writing
-    std::ofstream outFile("result_" + std::to_string(N) + ".txt");
+    std::ofstream outFile(filePath);
 
     // Check if the file is open
     if (!outFile.is_open()) {
@@ -271,5 +297,6 @@ void SlidingWindow::store_results_to_file() const {
     // Close the file
     outFile.close();
 }
+
 
 

@@ -1,5 +1,6 @@
 
 #include "DomainDecomposition.h"
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <omp.h>
@@ -35,7 +36,7 @@ DomainDecomposition::DomainDecomposition(float interactionStrength, int latticeS
     omp_set_num_threads(NUMTHREAD);
      // Initialize RandVect with std::make_unique
     RandVect = std::make_unique<std::vector<int> >();
-    RandVect->reserve(0);
+    RandVect->reserve(ceil(0));
     // Initialize EnergyResults with std::make_unique       
     EnergyResults = std::make_unique<std::vector<float> >();
     // Initialize MagnetizationResults with std::make_unique
@@ -62,6 +63,11 @@ void DomainDecomposition::simulate_phase_transition() {
 
 #pragma omp parallel 
     {
+       /*std::mt19937 rng_private(std::random_device{}());
+        std::vector<int> randVector_private;
+
+        randVector_private.reserve(ceil(IT/NUMTHREAD));*/
+
         #pragma omp single nowait
         {
              while (T < T_MAX) {
@@ -72,10 +78,12 @@ void DomainDecomposition::simulate_phase_transition() {
                 M_loc = 0; 
                 deltaE = 0; //shared variables for update
                 deltaM = 0;
+                //create a random vector for each temperature
                     for(int taskNum = 0; taskNum < NUMTHREAD; taskNum++ ){
                         // create and assign a task to the thread
                         #pragma omp task  firstprivate(M_loc, E_loc) shared(deltaM,deltaE)
                         {
+                            //create_rand_vector(randVector_private, rng_private);
                             //perform the simulation for a block
                             simulate_step(prob,lattice.get_lattice(), M_loc, E_loc, (*ThreadStart)[taskNum]);
                             #pragma omp atomic update //update shared variables
@@ -181,7 +189,7 @@ void DomainDecomposition::atomic_flip(std::vector<int>& lattice, std::array<floa
     }
 
     else if (delta == 4) {
-        float rnd = (rand() % 10000)/1e4;
+        float rnd = dist(rng);
         if (rnd < prob[0] ){
 #pragma omp atomic write
             lattice[site] = -lattice[site];
@@ -191,7 +199,7 @@ void DomainDecomposition::atomic_flip(std::vector<int>& lattice, std::array<floa
         }
     }
     else if (delta==8){
-        float rnd = (rand() % 10000)/1e4;
+        float rnd = dist(rng);
         if (rnd < prob[1]) {
 #pragma omp atomic write
             lattice[site] = -lattice[site];
@@ -234,14 +242,14 @@ void DomainDecomposition::flip(std::vector<int>& lattice, std::array<float, 2>& 
     if (delta <= 0) {
         lattice[site] = -lattice[site];
     } else if (delta == 4) {
-        float rnd = (rand() % 10000) / 1e4;
+        float rnd = dist(rng);
         if (rnd < prob[0]) {
             lattice[site] = -lattice[site];
         } else {
             return;
         }
     } else if (delta == 8) {
-        float rnd = (rand() % 10000) / 1e4;
+        float rnd = dist(rng);
         if (rnd < prob[1]) {
             lattice[site] = -lattice[site];
         } else {
@@ -256,14 +264,34 @@ void DomainDecomposition::flip(std::vector<int>& lattice, std::array<float, 2>& 
 void DomainDecomposition::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset) {
     int n;
     //create a private random vector and rng engine for each thread
-    auto rng_private = std::make_unique<std::mt19937>(std::random_device{}());
-    auto randVector_private = std::make_unique<std::vector<int>>();
+    std::random_device rd;
+    std::mt19937 rng_private(rd());
+    std::uniform_int_distribution<int> dist_private(0, A - 1);
+
+    /*auto randVector_private = std::make_unique<std::vector<int>>();
     randVector_private->reserve(ceil(IT/NUMTHREAD));
 
-    create_rand_vector(*randVector_private, *rng_private);
+    create_rand_vector(*randVector_private, *rng_private);*/
 
+    int r ,c ;
     for (unsigned long int i = 0; i < ceil((IT/NUMTHREAD));i++) {
-        n = (*randVector_private)[i];
+        int r = dist_private(rng_private);
+        int c = dist_private(rng_private);
+        n = r * L + c;
+        //if boundary flip atomically
+        if (r == 0 || c == 0 || r == A - 1 || c == A - 1) {
+            
+            atomic_flip(lattice, prob, n + offset, M, E);
+        }
+        else{
+            flip(lattice, prob, n + offset, M, E);
+        }
+    }
+}
+void DomainDecomposition::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset,std::vector<int>& randVector_private) {
+    int n;
+    for (unsigned long int i = 0; i < ceil((IT/NUMTHREAD));i++) {
+        n = randVector_private[i];
         //if boundary flip atomically
         if (n%A==0 || (n+1)%A==0 || n < A || n >A*(A-1)) {
             atomic_flip(lattice, prob, n + offset, M, E);
@@ -273,13 +301,12 @@ void DomainDecomposition::simulate_step (std::array<float, 2> prob, std::vector<
         }
     }
 }
-
 //store results in a file
 void DomainDecomposition::store_results_to_file() const {
 
-    std::string filePath = "results_DomainDec/result_" + std::to_string(N) + ".txt";
+ std::string filePath = "./Results/Domain/Result_" + std::to_string(L) + ".txt";
     // Open the file for writing
-    std::ofstream outFile("result_" + std::to_string(N) + ".txt");
+    std::ofstream outFile(filePath);
 
     // Check if the file is open
     if (!outFile.is_open()) {
