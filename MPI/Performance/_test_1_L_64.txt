@@ -1,0 +1,3 @@
+Serial: 131 s
+Domain Decompositon: 100 s
+Sliding Window: 63 s
