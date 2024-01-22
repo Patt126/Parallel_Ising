@@ -169,16 +169,17 @@ void plotSpecificHeat(const std::vector<float>& specificHeat, const std::vector<
 int main() {
     // Variables to store the file path and the result vectors
     std::string filePath;
-    std::unique_ptr<std::vector<float>> M_result = std::make_unique<std::vector<float>>();
-    std::unique_ptr<std::vector<float>> E_result = std::make_unique<std::vector<float>>();
-    std::unique_ptr<std::vector<float>> T_value = std::make_unique<std::vector<float>>();
+    std::vector<float> M_result;
+    std::vector<float> E_result ;
+    std::vector<float> T_value ;
+    std::vector<float> specificHeatValues;
 
     // Prompt the user to enter the file path
     std::cout << "Enter the path of the result file: ";
     std::cin >> filePath;
 
     // Call the function to read results from the file
-    readResultsFromFile(filePath, *M_result, *E_result, *T_value);
+    readResultsFromFile(filePath, M_result, E_result, T_value);
 
     // Choice menu
     int choice;
@@ -194,18 +195,17 @@ int main() {
 
         switch (choice) {
             case 1:
-                plotEnergy(*E_result, *T_value);
+                plotEnergy(E_result, T_value);
                 break;
             case 2:
-                plotMagnetizationOverTemperature(*M_result, *T_value);
+                plotMagnetizationOverTemperature( M_result,  T_value);
                 break;
             case 3:
-                std::unique_ptr<std::vector<float>> specificHeatValues = std::make_unique<std::vector<float>>();
-                calculateSpecificHeat(*E_result, *T_value, *specificHeatValues);
-                plotSpecificHeat(*specificHeatValues, *T_value);
+                calculateSpecificHeat( E_result,  T_value,  specificHeatValues);
+                plotSpecificHeat( specificHeatValues,  T_value);
                 break;
             case 4:
-                float criticalTemperature = estimateCriticalTemperature(*M_result, *T_value);
+                float criticalTemperature = estimateCriticalTemperature( M_result,  T_value);
                 std::cout << "Critical temperature: " << criticalTemperature << std::endl;
                 break;
             case 0:
