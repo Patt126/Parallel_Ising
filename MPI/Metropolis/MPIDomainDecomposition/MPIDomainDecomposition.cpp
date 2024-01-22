@@ -54,7 +54,7 @@ void MPIDomainDecomposition::simulate_phase_transition() {
     std::array<float, 2> prob;
     
 
-#pragma omp parallel num_threads(NUMTHREAD/MPISIZE)
+#pragma omp parallel num_threads(NUMTHREAD)
     {
         #pragma omp single nowait
         {

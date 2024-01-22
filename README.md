@@ -15,8 +15,17 @@ This project implements the Ising model simulation using C++ and offers parallel
 
 ## Update
 
-- In the latest simulation, conducted on a high-performance computer equipped with a substantial number of cores, we were able to explore larger lattices. However, we observed that the approach of pre-storing and manipulating a fixed sequence of random numbers proved to be resource-intensive in terms of memory usage. Consequently, I reverted to a simpler strategy where a random number is generated on-the-fly when needed. While this incurs a higher computational cost, it significantly improves memory performance. In the code, I have ve preserved commented or unused sections from the previous implementation as a form of documentation to trace the development process.
-- Autostop code has still some bug about storing results
+- MPI VERSION ADDED to build and run:
+from MPI directory
+
+```bash
+make
+mpirun -np numberProcesses ./simulation
+```
+Typical value could be: 
+- L_TOTAL = 64 , numberProcesses = 2 , NUMTHREAD = 8
+- L_TOTAL = 256 , numberProcesses = 4 , NUMTHREAD = 16
+
 
 # Parallel Algorithm
 
@@ -33,6 +42,7 @@ The lattice is divided into two alternating sublattices resembling a checkerboar
 
 - C++ Compiler with C++17 or later support.
 - OpenMP for multicore CPU parallelization.
+- MPI implementation (e.g., MPICH or OpenMPI) for distributed system parallelization.
 - Gnuplot-iostream Library for results visualisation. You can find the Gnuplot-iostream library [Here](http://stahlke.org/dan/gnuplot-iostream/). Follow the installation instructions provided on the website.
 
 
