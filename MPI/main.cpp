@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     std::string filename = "_test_1";
     std::vector<float> time_results;
 
-
+    //check the possibility of cover the lattice with the thread and process indicated
     if (world_rank == 0) {
     int GLOBAL_NUMTHREAD = world_size*NUMTHREAD;
     int THREADPERSIDE = sqrt(GLOBAL_NUMTHREAD);
@@ -58,14 +58,11 @@ int main(int argc, char* argv[]) {
     // Determine the width and heigth of the rectangular lattice for each MPI process
     int width = L_TOTAL;
     int heigth = L_TOTAL/world_size;
-    if(world_rank == 0){
-    std::cout<<world_size<<" "<<world_rank<<" "<<width<<" "<<heigth;
-    }
     
     // Loop over lattice sizes
-        IT = ceil(pow(L_TOTAL, 4.5));
+        IT = ceil(pow(L_TOTAL, 4.4));
 
-        
+        // instantiate for each process an object
         DomainDecomposition domainSimulation(interactionStrength, width,heigth, NUMTHREAD,world_size, T_MIN, T_MAX, T_STEP, IT);
         auto startDomain = std::chrono::high_resolution_clock::now();
         domainSimulation.simulate_phase_transition();
@@ -74,17 +71,20 @@ int main(int argc, char* argv[]) {
         auto durationDomain = std::chrono::duration_cast<std::chrono::seconds>(stopDomain - startDomain);
         time_results.push_back(durationDomain.count());
 
-
+        //store results (ask one process)
         if(world_rank == 0)
         {
             domainSimulation.store_results_to_file();
+            store_performance_to_file(time_results, L_TOTAL, filename);
+            time_results.clear();
         }
 
+        //visualize the whole lattice
+        //need to be called whitin all process, suggest to put a barrier before to visualize correct result
         MPI_Barrier(MPI_COMM_WORLD);
         domainSimulation.print_full_lattice();
-        // Store performance results for all methods after completing all iterations
-    store_performance_to_file(time_results, L_TOTAL, filename);
-    time_results.clear();
+
+    
     MPI_Finalize();    
 
     return 0;

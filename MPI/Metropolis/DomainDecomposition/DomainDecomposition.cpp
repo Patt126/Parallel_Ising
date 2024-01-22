@@ -86,15 +86,17 @@ void DomainDecomposition::simulate_phase_transition() {
                         }
                     }
                     #pragma omp taskwait
+                    //move the global lattice to update boundary
                     exchange_rows();
                  } 
                   
             totalDeltaE = 0;
             totalDeltaM = 0;
+            //collect global results
             MPI_Allreduce(&deltaM, &totalDeltaM, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
             MPI_Allreduce(&deltaE, &totalDeltaE, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
-            //store results
+            //store results (each process)
             Temperatures.emplace_back(T);
             EnergyResults.emplace_back(lattice.get_interaction_energy()*totalDeltaE);
             m = static_cast<float>(totalDeltaM) / N;
@@ -110,6 +112,7 @@ void DomainDecomposition::simulate_phase_transition() {
 }
 }
 
+//print the full lattice,rank == 0 process get al the part and visualze it.
 void DomainDecomposition::print_full_lattice() {
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -137,12 +140,12 @@ void DomainDecomposition::print_full_lattice() {
 
         // Receive and store the lattices from other processes
         for (int source = 1; source < size; ++source) {
-            //  non-blocking receive
+            //  non-blocking receive since all data are written on different part of the vector
             MPI_Irecv(totalLattice.data() + source * localN, localN, MPI_INT, source, 0, MPI_COMM_WORLD, &recvRequests[source - 1]);
         }
 
-        // Wait for all non-blocking receives to complete and get status
-        //MPI_Waitall(size - 1, recvRequests.data(), MPI_STATUS_IGNORE);
+        // Wait for all non-blocking receives to complete 
+        MPI_Waitall(size - 1, recvRequests.data(), MPI_STATUS_IGNORE);
 
         // Print the full lattice (only the first process should print)
         for (int i = 0; i < W; ++i) {
@@ -288,7 +291,7 @@ void DomainDecomposition::simulate_step ( std::array<float, 2> prob, std::vector
     }
 }
 
-
+//processes comunication to update boundary
 void DomainDecomposition::exchange_rows() {
     // Determine the ranks of the adjacent processes
     int world_size, world_rank;

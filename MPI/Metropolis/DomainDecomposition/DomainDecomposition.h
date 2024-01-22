@@ -52,7 +52,7 @@ public:
 
 
    /**
-     * @brief Collecti and print the whole lattice
+     * @brief Collect and print the whole lattice
      */
     void print_full_lattice();
 
@@ -101,6 +101,10 @@ protected:
      */
     int set_block_size();
 
+    /**
+     * @brief update boundary spins allowing each process to receive to row for the beginning,
+     * send two last, and tranlsate by two row the remaining part.
+    */
     void exchange_rows() ;
 
 private:
