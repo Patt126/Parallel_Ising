@@ -24,8 +24,8 @@ SquareLattice::SquareLattice(float interactionStrength, int latticeSize)
       M(),
       E()
 {
-    lattice = std::make_unique<std::vector<int>>(N); // Automatically reserved and initialized to 0
-    randomLattice = std::make_unique<std::vector<int>>(N); // Automatically reserved and initialized to 0
+    randomLattice.resize(N);
+    lattice.resize(N);
     initialize();
     restore_random_lattice();
 }
@@ -37,7 +37,7 @@ void SquareLattice::print_lattice() const {
     for (int i = 0; i < N; i++) {
         if (i % L == 0)
             std::cout << std::endl;
-        if ((*lattice)[i] == -1)
+        if (lattice[i] == -1)
             std::cout << "o ";
         else
             std::cout << "x ";
@@ -67,7 +67,7 @@ void SquareLattice::print_lattice() const {
         // Write lattice data to the pipe
         for (int i = 0; i < L; ++i) {
             for (int j = 0; j < L; ++j) {
-                fprintf(gp, "%d ", (*lattice)[i * L + j]);
+                fprintf(gp, "%d ", Lattice[i * L + j]);
             }
             fprintf(gp, "\n");
         }
@@ -88,13 +88,13 @@ float SquareLattice::evaluate_energy() const {
     int sum = 0;
     for (int i = 0; i < N; i++) {
         if (i >= L) // NO FIRST ROW
-            sum += (*lattice)[i - L] * (*lattice)[i] * 2;
+            sum += lattice[i - L] * lattice[i] * 2;
         if (i % L != 0) // NO FIRST COLUMN
-            sum += (*lattice)[i - 1] * (*lattice)[i] * 2;
+            sum += lattice[i - 1] * lattice[i] * 2;
         if (i >= L * (L - 1)) // LAST ROW
-            sum += (*lattice)[i - L * (L - 1)] * (*lattice)[i] * 2;
+            sum += lattice[i - L * (L - 1)] * lattice[i] * 2;
         if ((i + 1) % L == 0) // LAST COLUMN
-            sum += (*lattice)[i - (L - 1)] * (*lattice)[i] * 2;
+            sum += lattice[i - (L - 1)] * lattice[i] * 2;
     }
     return -J * sum;
 }
@@ -109,30 +109,33 @@ void SquareLattice::initialize() {
     for (int i = 0; i < N; i++) {
         int k = rand() % 2;
         if (k == 0) {
-            (*randomLattice)[i] = -1;
+            randomLattice[i] = -1;
             M_rand -= 1;
         } else {
-            (*randomLattice)[i] = 1;
+            randomLattice[i] = 1;
             M_rand += 1;
         }
 
         if (i >= L) // NO FIRST ROW
-            sum += (*randomLattice)[i - L] * (*randomLattice)[i] * 2;
+            sum += randomLattice[i - L] * randomLattice[i] * 2;
         if (i % L != 0) // NO FIRST COLUMN
-            sum += (*randomLattice)[i - 1] * (*randomLattice)[i] * 2;
+            sum += randomLattice[i - 1] * randomLattice[i] * 2;
         if (i >= L * (L - 1)) // LAST ROW
-            sum += (*randomLattice)[i - L * (L - 1)] * (*randomLattice)[i] * 2;
+            sum += randomLattice[i - L * (L - 1)] * randomLattice[i] * 2;
         if ((i + 1) % L == 0) // LAST COLUMN
-            sum += (*randomLattice)[i - (L - 1)] * (*randomLattice)[i] * 2;
+            sum += randomLattice[i - (L - 1)] * randomLattice[i] * 2;
     }
 
     E_rand = -J * sum;
 }
+
+
+
 
 /**
  * @brief Gets a reference to the lattice.
  * @return A reference to the lattice vector.
  */
 std::vector<int>& SquareLattice::get_lattice() {
-    return *lattice;
+    return lattice;
 }

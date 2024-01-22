@@ -1,7 +1,7 @@
-CXX = clang++
+CXX = g++
 CXXFLAGS = -std=c++17 -fopenmp
-SRCDIR = ./Lattice ./Metropolis/SerialMetropolis ./Metropolis/DomainDecomposition ./Metropolis/SlidingWindow
-INCLUDEDIRS = -I./Lattice -I./Metropolis/SerialMetropolis -I./Metropolis/DomainDecomposition -I./Metropolis/SlidingWindow
+SRCDIR = ./Lattice ./Metropolis/SerialMetropolis ./Metropolis/DomainDecomposition ./Metropolis/SlidingWindow ./Metropolis
+INCLUDEDIRS = -I./Lattice -I./Metropolis/SerialMetropolis -I./Metropolis/DomainDecomposition -I./Metropolis/SlidingWindow  -I./Metropolis
 
 SOURCES = main.cpp \
           $(foreach dir, $(SRCDIR), $(wildcard $(dir)/*.cpp))

@@ -10,8 +10,8 @@
 #include <vector>
 #include <memory>
 #include <random>
-#include "../AbstractMonteCarloSimulation.h"
-#include "../../Lattice/SquareLattice.h"
+#include "AbstractMonteCarloSimulation.h"
+#include "SquareLattice.h"
 
 /**
  * @brief Class representing a Monte Carlo simulation using domain decomposition.
@@ -43,25 +43,15 @@ public:
      */
     void simulate_phase_transition() override;
 
+
     /**
      * @brief Store the results of the simulation to a file.
      */
     void store_results_to_file() const override;
 
-protected:
-    /**
-     * @brief Create a random vector for the simulation.
-     */
-    void create_rand_vector() override;
 
-    /**
-     * @brief Create a random vector for a specific thread in parallel using a private RNG.
-     *
-     * @param randVector Reference to the random vector.
-     * @param rngPrivate Private Mersenne Twister generator for the thread.
-     */
-    void create_rand_vector(std::vector<int>& randVector, std::mt19937& rngPrivate);
 
+   
     /**
      * @brief Flip a spin at a given lattice site during the simulation.
      *
@@ -70,8 +60,9 @@ protected:
      * @param site Index of the lattice site to flip.
      * @param magnetization Reference to the magnetization variable.
      * @param energy Reference to the energy variable.
+     * @param rng_private Random number generator.
      */
-    void flip(std::vector<int>& lattice, std::array<float, 2>& prob, int site, int& magnetization, int& energy);
+    void flip(std::vector<int>& lattice, std::array<float, 2>& prob, const int& site, int& magnetization, int& energy, std::mt19937& rng_private);
 
     /**
      * @brief Atomically flip a spin at a given lattice site during the simulation.
@@ -83,7 +74,7 @@ protected:
      * @param magnetization Reference to the magnetization variable.
      * @param energy Reference to the energy variable.
      */
-    void atomic_flip(std::vector<int>& lattice, std::array<float, 2>& prob, int site, int& magnetization, int& energy);
+    void atomic_flip(std::vector<int>& lattice, std::array<float, 2>& prob, const int& site, int& magnetization, int& energy, std::mt19937& rng_private);
 
     /**
      * @brief Simulate the step of a thread block in the Monte Carlo simulation.
@@ -94,8 +85,7 @@ protected:
      * @param energy Reference to the energy variable.
      * @param offset Offset for the starting point of each block.
      */
-    void simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& magnetization, int& energy, int offset) override;
-    void simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset,std::vector<int>& randVector); 
+    void simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& magnetization, int& energy, const int& offset) override;
     /**
      * @brief Set the block width for the domain decomposition.
      *
@@ -105,20 +95,18 @@ protected:
 
 private:
     SquareLattice lattice;  /**< Square lattice used in the simulation. */
-    std::unique_ptr<std::vector<int>> RandVect;  /**< Random vector of size N. */
-    std::unique_ptr<std::vector<float>> EnergyResults;  /**< Vector to store energy results. */
-    std::unique_ptr<std::vector<float>> MagnetizationResults;  /**< Vector to store magnetization results. */
-    std::unique_ptr<std::vector<float>> Temperatures;  /**< Vector to store temperature visited. */
-    std::unique_ptr<std::vector<int>> ThreadStart;  /**< Vector to store Monte Carlo steps. */
-    float T_MIN;
-    float T_MAX;
-    float T_STEP;
+    std::vector<float> EnergyResults;  /**< Vector to store energy results. */
+    std::vector<float> MagnetizationResults;  /**< Vector to store magnetization results. */
+    std::vector<float> Temperatures;  /**< Vector to store temperature visited. */
+    std::vector<int> ThreadStart;  /**< Vector to store Monte Carlo steps. */
+    const float T_MIN;
+    const float T_MAX;
+    const float T_STEP;
     const int L;
     const int N;
     const long int IT;
     const int NUMTHREAD;
     int A;
-    std::mt19937 rng;  /**< Mersenne Twister 19937 generator. */
     std::uniform_real_distribution<double> dist;  /**< Uniform distribution in [0, 1). */
 };
 

@@ -18,48 +18,21 @@ void store_performance_to_file(std::vector<float> time_results,int L , std::stri
     file.close();
 }
 
-/**
- * @brief Main function for Benchmarking Ising Monte Carlo implementations.
- * @return 0 on successful execution.
- */
 int main() {
-    // User input variables
-    int L_MIN, L_MAX, NUMTHREAD;
-    float T_MIN, T_MAX, T_STEP, interactionStrength;
+    int L_MIN = 64;
+    int L_MAX = 64;
+    int NUMTHREAD = 4;
+    float T_MIN = 0.1; 
+    float T_MAX = 2.6;
+    float T_STEP = 0.3; 
+    float interactionStrength = 1.0;
     long int IT;
-    std::string filename;
-
-    // Taking user input for variables
-    std::cout << "Enter minimum L: ";
-    std::cin >> L_MIN;
-
-    std::cout << "Enter maximum L: ";
-    std::cin >> L_MAX;
-
-    std::cout << "Enter minimum temperature (T_MIN): ";
-    std::cin >> T_MIN;
-
-    std::cout << "Enter maximum temperature (T_MAX): ";
-    std::cin >> T_MAX;
-
-    std::cout << "Enter temperature step (T_STEP): ";
-    std::cin >> T_STEP;
-
-    std::cout << "Enter interaction strength: ";
-    std::cin >> interactionStrength;
-
-    std::cout << "Enter number of threads \n"
-              << "(please for organization reason enter a perfect square and a number that allows covering the whole lattice in blocks): ";
-    std::cin >> NUMTHREAD;
-
-     std::cout << "Enter filename:";
-    std::cin >> filename;
-    
+    std::string filename = "_test_1";
     std::vector<float> time_results;
 
     // Loop over lattice sizes
     for (int L = L_MIN; L <= L_MAX; L *= 2) {
-        IT = ceil(pow(L, 4.5));
+        IT = ceil(pow(L, 4.4));
         std::cout << "Simulation start for L = " << L << std::endl;
 
         {

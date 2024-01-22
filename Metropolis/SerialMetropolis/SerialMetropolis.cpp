@@ -1,7 +1,6 @@
 
 #include "SerialMetropolis.h"
 #include <cstdlib>
-#include <cmath>
 #include <fstream>
 #include <omp.h>
 
@@ -9,7 +8,6 @@
 
 SerialMetropolis::SerialMetropolis(float interactionStrength, int latticeSize  , float T_MIN, float T_MAX, float T_STEP, long int IT)
 : lattice(interactionStrength, latticeSize),  
-        RandVect(),
         EnergyResults(),
         MagnetizationResults(),
         Temperatures(),
@@ -23,18 +21,6 @@ SerialMetropolis::SerialMetropolis(float interactionStrength, int latticeSize  ,
         dist(0.0, 1.0)
       
 {   
-
-    // Initialize RandVect with std::make_unique
-    RandVect = std::make_unique<std::vector<int> >();
-    RandVect->reserve(0);
-    // Initialize rand_vect with create_rand_vect function
-    //create_rand_vector();
-    // Initialize EnergyResults with std::make_unique       
-    EnergyResults = std::make_unique<std::vector<float> >();
-    // Initialize MagnetizationResults with std::make_unique
-    MagnetizationResults = std::make_unique<std::vector<float> >();
-    // Initialize Temperatures with std::make_unique
-    Temperatures = std::make_unique<std::vector<float> >();
 
 
 }
@@ -63,29 +49,23 @@ void SerialMetropolis::simulate_phase_transition() {
         lattice.increment_energy(deltaE*lattice.get_interaction_energy());
 
         
-        Temperatures->emplace_back(T);
+        Temperatures.emplace_back(T);
         T += T_STEP;
-        EnergyResults->emplace_back(lattice.get_energy());
+        EnergyResults.emplace_back(lattice.get_energy());
         m = static_cast<float>(lattice.get_magnetization()) / N;
-        MagnetizationResults->emplace_back(abs(m));
+        MagnetizationResults.emplace_back(fabs(m));
         lattice.restore_random_lattice();
         }
     }   
     
 
 
-void SerialMetropolis::create_rand_vector() {
-    for (int j = 0;j<(IT);j++) {
-        int r = static_cast<int>(dist(rng) * L);
-        int c = static_cast<int>(dist(rng) * L);
-        RandVect->emplace_back ((r * L + c));
-        }
-}
 
 
 
 
-void SerialMetropolis::flip(std::vector<int>& lattice, std::array<float, 2>& prob, int site, int& M, int& E) {
+
+void SerialMetropolis::flip(std::vector<int>& lattice, std::array<float, 2>& prob, const int& site, int& M, int& E) {
     int sum = 0;
 
     if (site < L) {
@@ -132,9 +112,10 @@ void SerialMetropolis::flip(std::vector<int>& lattice, std::array<float, 2>& pro
 }
 
 
-void SerialMetropolis::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset ) {
+void SerialMetropolis::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, const int& offset ) {
+    int n = 0;
     for (unsigned long int i = 0; i < (IT);i++) {
-        int n = static_cast<int>(dist(rng) * L * L);
+        int n = static_cast<int>(dist(rng) * N);
         flip(lattice, prob, n , M, E);
     }
 }
@@ -157,11 +138,11 @@ void SerialMetropolis::store_results_to_file() const {
     outFile << "E  M  T " << std::endl;
 
     // Determine the number of results to write
-    std::size_t numResults = EnergyResults->size(); //they all have same lenght
+    std::size_t numResults = EnergyResults.size(); //they all have same lenght
     // Write results to the file
     for (std::size_t i = 0; i < numResults; ++i) {
         // Write data for each row
-        outFile << (*EnergyResults)[i] << " " << (*MagnetizationResults)[i] << " " << (*Temperatures)[i]  << std::endl;
+        outFile << EnergyResults[i] << " " << MagnetizationResults[i] << " " << Temperatures[i]  << std::endl;
 
     }
 

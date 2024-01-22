@@ -20,16 +20,11 @@ public:
      */
     virtual void simulate_phase_transition() = 0;
 
-protected:
-    /**
-     * @brief Create a random vector for the simulation indicating the 
-     * site to flip. Depending on the implementation, this vector can have
-     * different sizes.
-     *
-     * Pure virtual function to be implemented by derived classes.
-     */
-    virtual void create_rand_vector() = 0;
+      // Default Destructor
+    virtual ~AbstractMonteCarloSimulation() = default;
 
+protected:
+  
     /**
      * @brief Simulate a step in the Monte Carlo simulation. 
      * A step correspong in general to multiple Monte Carlo steps.
@@ -44,7 +39,7 @@ protected:
      *
      * Pure virtual function to be implemented by derived classes.
      */
-    virtual void simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, int offset = 0) = 0;
+    virtual void simulate_step(const std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E, const int& offset = 0) = 0;
 
     /**
      * @brief Store the results of Energy and Magnetization of the simulation to a file.
@@ -52,6 +47,9 @@ protected:
      * Pure virtual function to be implemented by derived classes.
      */
     virtual void store_results_to_file() const = 0;
+
+
+
 
 };
 

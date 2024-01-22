@@ -8,7 +8,6 @@
 
 CheckBoard::CheckBoard(float interactionStrength, int latticeSize ,int NUMTHREAD , float T_MIN, float T_MAX, float T_STEP, long int IT)
 : lattice(interactionStrength, latticeSize),  
-        RandVect(),
         EnergyResults(),
         MagnetizationResults(),
         Temperatures(),
@@ -22,12 +21,9 @@ CheckBoard::CheckBoard(float interactionStrength, int latticeSize ,int NUMTHREAD
         A(),
         ThreadStart(),
         NumFlipPerBlock(),
-        rng(std::random_device{}()),
         dist(0.0, 1.0)
 {   
-    // Initialize tStart with std::make_unique
-    ThreadStart = std::make_unique<std::vector<int> >();
-    ThreadStart->reserve(2*NUMTHREAD);
+    ThreadStart.reserve(2*NUMTHREAD);
     // Initialize A with set_block_size function
     A = set_block_size();
     NumFlipPerBlock = 0.01*IT;
@@ -36,18 +32,6 @@ CheckBoard::CheckBoard(float interactionStrength, int latticeSize ,int NUMTHREAD
     exit(EXIT_FAILURE);
     }
     omp_set_num_threads(NUMTHREAD);
-    // Initialize RandVect with std::make_unique
-    RandVect = std::make_unique<std::vector<int> >();
-    RandVect->reserve(NumFlipPerBlock);
-    // Initialize rand_vect with create_rand_vect function
-    create_rand_vector();
-    // Initialize EnergyResults with std::make_unique       
-    EnergyResults = std::make_unique<std::vector<float> >();
-    // Initialize MagnetizationResults with std::make_unique
-    MagnetizationResults = std::make_unique<std::vector<float> >();
-    // Initialize Temperatures with std::make_unique
-    Temperatures = std::make_unique<std::vector<float> >();
-
 
 }
 
@@ -77,14 +61,13 @@ void CheckBoard::simulate_phase_transition() {
                 deltaE = 0; //evaluate global energy variation
                 deltaM = 0; //evaluate global magnetization variation
                for(int slide = 0; slide < ceil(IT/(2*NUMTHREAD*NumFlipPerBlock)); slide++ ){
-                    create_rand_vector();
                     E_loc = 0;
                     M_loc = 0; 
                     //even blocks of the checkboard
                     for(int taskNum = 0; taskNum < 2*NUMTHREAD; taskNum+=2){
                         #pragma omp task  firstprivate(M_loc, E_loc) shared(deltaM,deltaE)
                         {   
-                            simulate_step(prob,lattice.get_lattice(), M_loc, E_loc, (*ThreadStart)[taskNum]);
+                            simulate_step(prob,lattice.get_lattice(), M_loc, E_loc, ThreadStart[taskNum]);
                             #pragma omp atomic update //update the global variables
                             deltaM += M_loc;
                             #pragma omp atomic update
@@ -93,13 +76,12 @@ void CheckBoard::simulate_phase_transition() {
                     }
                     #pragma omp taskwait //wait for all the task to finish
                     //odd blocks of the checkboard
-                    create_rand_vector();
                     E_loc = 0;
                     M_loc = 0;
                     for(int taskNum = 1; taskNum < 2*NUMTHREAD; taskNum+=2){
                         #pragma omp task  firstprivate(M_loc, E_loc) shared(deltaM,deltaE)
                         {
-                            simulate_step(prob,lattice.get_lattice(), M_loc, E_loc, (*ThreadStart)[taskNum]);
+                            simulate_step(prob,lattice.get_lattice(), M_loc, E_loc, ThreadStart[taskNum]);
                             #pragma omp atomic update //update the global variables
                             deltaM += M_loc;
                             #pragma omp atomic update
@@ -115,10 +97,10 @@ void CheckBoard::simulate_phase_transition() {
             m = static_cast<float>(lattice.get_magnetization()) / N;
 
             //store results
-            Temperatures->emplace_back(T);
+            Temperatures.emplace_back(T);
             T += T_STEP;
-            EnergyResults->emplace_back(lattice.get_energy());
-            MagnetizationResults->emplace_back(abs(m));
+            EnergyResults.emplace_back(lattice.get_energy());
+            MagnetizationResults.emplace_back(abs(m));
             lattice.restore_random_lattice();
              }
         }
@@ -126,15 +108,6 @@ void CheckBoard::simulate_phase_transition() {
 }
 
 
-void CheckBoard::create_rand_vector() {
-    //  N/NUMBLOCKS is the number of iteration for each task
-    RandVect->clear();
-    for (int j = 0;j<(NumFlipPerBlock);j++) {
-        int r = static_cast<int>(dist(rng) * A);
-        int c = static_cast<int>(dist(rng) * A);
-        RandVect->emplace_back ((r * L + c));
-        }
-}
 
 
 int CheckBoard::set_block_size() {
@@ -147,7 +120,7 @@ int CheckBoard::set_block_size() {
         if (L % THREADPERSIDE == 0) {
             int A_loc = L / THREADPERSIDE; // = bloch width
         for(int i=0;i<  2*NUMTHREAD;i++){
-                (*ThreadStart)[i] = (floor(i/THREADPERSIDE)*A_loc*L + i%THREADPERSIDE*A_loc); //thread at which each block start
+                ThreadStart[i] = (floor(i/THREADPERSIDE)*A_loc*L + i%THREADPERSIDE*A_loc); //thread at which each block start
             }
             return A_loc;
         }
@@ -161,7 +134,9 @@ int CheckBoard::set_block_size() {
 
 //flip the spin of the site and update the energy and magnetization 
 //implement the metropolis algorithm described in the report
-void CheckBoard::flip(std::vector<int>& lattice, std::array<float, 2>& prob, int site, int& M, int& E) {
+//flip the spin of the site and update the energy and magnetization 
+//implement the metropolis algorithm described in the report
+void CheckBoard::flip(std::vector<int>& lattice, std::array<float, 2>& prob, const int& site, int& M, int& E, std::mt19937& rng_private) {
     int sum = 0;
 
     if (site < L) {
@@ -189,14 +164,14 @@ void CheckBoard::flip(std::vector<int>& lattice, std::array<float, 2>& prob, int
     if (delta <= 0) {
         lattice[site] = -lattice[site];
     } else if (delta == 4) {
-        float rnd = dist(rng);
+        float rnd = dist(rng_private);
         if (rnd < prob[0]) {
             lattice[site] = -lattice[site];
         } else {
             return;
         }
     } else if (delta == 8) {
-        float rnd = (dist(rng));
+        float rnd = dist(rng_private);
         if (rnd < prob[1]) {
             lattice[site] = -lattice[site];
         } else {
@@ -208,13 +183,26 @@ void CheckBoard::flip(std::vector<int>& lattice, std::array<float, 2>& prob, int
 }
 
 // simulate the operation for one block of the checkboard each iteration
-void CheckBoard::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M_loc, int& E_loc, int offset) {
+void CheckBoard::simulate_step (std::array<float, 2> prob, std::vector<int>& lattice, int& M_loc, int& E_loc, const int& offset) {
     int n;
+    //create a private random vector and rng engine for each thread
+    std::random_device rd;
+    std::mt19937 rng_private(rd());
+    std::uniform_int_distribution<int> dist_private(0, A - 1);
+
+
+
+    int r ,c ;
     for (unsigned long int i = 0; i < (NumFlipPerBlock);i++) {
-        n = (*RandVect)[i];
-        flip(lattice, prob, n + offset, M_loc, E_loc);
+        int r = dist_private(rng_private);
+        int c = dist_private(rng_private);
+        n = r * L + c;
+        flip(lattice, prob, n + offset, M_loc, E_loc,rng_private);
     }
 }
+
+
+
 
 //store the results in a file
 void CheckBoard::store_results_to_file() const {
@@ -234,16 +222,14 @@ void CheckBoard::store_results_to_file() const {
     outFile << "E  M  T " << std::endl;
 
     // Determine the number of results to write
-    std::size_t numResults = EnergyResults->size(); //they all have same lenght
+    std::size_t numResults = EnergyResults.size(); //they all have same lenght
     // Write results to the file
     for (std::size_t i = 0; i < numResults; ++i) {
         // Write data for each row
-        outFile << (*EnergyResults)[i] << " " << (*MagnetizationResults)[i] << " " << (*Temperatures)[i]  << std::endl;
+        outFile << EnergyResults[i] << " " << MagnetizationResults[i] << " " << Temperatures[i]  << std::endl;
 
     }
 
     // Close the file
     outFile.close();
 }
-
-
