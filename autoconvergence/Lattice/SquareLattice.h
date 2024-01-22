@@ -93,7 +93,7 @@ public:
      * usefull after a simulation for one temperature to start a new one.
      */
     void restore_random_lattice() {
-        lattice->assign(randomLattice->begin(), randomLattice->end());
+        lattice.assign(randomLattice.begin(), randomLattice.end());
         M = M_rand;
         E = E_rand;
     }
@@ -101,13 +101,13 @@ public:
 private:
     const int L; ///< Size of the square lattice.
     const float J; ///< Interaction strength for the lattice.
-    int N; ///< Total number of lattice sites.
+    const int N; ///< Total number of lattice sites.
     int M; ///< Magnetization of the lattice.
     float E; ///< Energy of the lattice.
     int M_rand; ///< Magnetization of the randomly initialized lattice.
     float E_rand; ///< Energy of the randomly initialized lattice.
-    std::unique_ptr<std::vector<int>> lattice; ///< Pointer to the lattice vector.
-    std::unique_ptr<std::vector<int>> randomLattice; ///< Pointer to the randomly initialized lattice vector.
+    std::vector<int> lattice; ///< Pointer to the lattice vector.
+    std::vector<int> randomLattice; ///< Pointer to the randomly initialized lattice vector.
 };
 
 #endif // SQUARELATTICE_H

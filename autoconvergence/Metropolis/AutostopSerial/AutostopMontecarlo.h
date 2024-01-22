@@ -5,7 +5,8 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include "../AbstractAUTOMonteCarloSimulation.h"
+#include <random>
+#include "AbstractAUTOMonteCarloSimulation.h"
 #include "SquareLattice.h"
 
 /**
@@ -27,7 +28,7 @@ public:
      * @param T_MAX The maximum temperature.
      * @param T_STEP The temperature step size.
      */
-    AutostopMontecarlo(float interactionStrength, int latticeSize, float Tolerance, float T_MIN, float T_MAX, float T_STEP);
+    AutostopMontecarlo(float interactionStrength, int latticeSize, float T_MIN, float T_MAX, float T_STEP,float tolerance);
 
     /**
      * @brief Perform the simulation of a phase transition with an automatic stopping criterion.
@@ -40,15 +41,7 @@ public:
     void store_results_to_file() const override;
 
 protected:
-    /**
-     * @brief Create a random vector for the simulation.
-     */
-    void create_rand_vector() override {
-        for (int j = 0; j < N; j++) {
-            (*randVect)[j] = rand() % N;
-        }
-    }
-
+  
     /**
      * @brief Calculate the exact magnetization at a given temperature from Onsager formula.
      *
@@ -78,22 +71,24 @@ protected:
      * @param M Reference to the magnetization variable.
      * @param E Reference to the energy variable.
      */
-    int simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E,int offset = 0 ) override;
+    int simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E,const int& offset = 0 ) override;
 
 private:
 
     SquareLattice lattice;  // Use SquareLattice as a private member
-    std::unique_ptr<std::vector<int>> randVect;               // Random vector of size N.
-    std::unique_ptr<std::vector<float>> energyResults;        // Vector to store energy results.
-    std::unique_ptr<std::vector<float>> magnetizationResults; // Vector to store magnetization results.
-    std::unique_ptr<std::vector<int>> monteCarloStepsResults; // Vector to store number of Monte Carlo steps performed.
-    std::unique_ptr<std::vector<float>> temperatures;         // Vector to store temperatures visited.
+    std::vector<int> randVect;               // Random vector of size N.
+    std::vector<float> energyResults;        // Vector to store energy results.
+    std::vector<float> magnetizationResults; // Vector to store magnetization results.
+    std::vector<int> monteCarloStepsResults; // Vector to store number of Monte Carlo steps performed.
+    std::vector<float> temperatures;         // Vector to store temperatures visited.
     float T_MIN;
     float T_MAX;
     float tolerance; // Tolerance value.
     float T_STEP;
     const int L;
     const int N;
+    std::mt19937 rng; // Random number generator.
+    std::uniform_real_distribution<double> dist; // Uniform distribution.
 };
 
 #endif // MY_PROJECT_MONTE_CARLO_SIMULATION_H

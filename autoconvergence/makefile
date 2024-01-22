@@ -1,7 +1,7 @@
 CXX = clang++
 CXXFLAGS = -std=c++17 -fopenmp
-SRCDIR = ./Lattice ./Metropolis/AutostopSerial ./Metropolis/AutostopDomainDecomposition 
-INCLUDEDIRS = -I./Lattice -I./Metropolis/AutostopSerial -I./Metropolis/AutostopDomainDecomposition 
+SRCDIR = ./Lattice ./Metropolis/AutostopSerial ./Metropolis/AutostopDomainDecomposition ./Metropolis
+INCLUDEDIRS = -I./Lattice -I./Metropolis/AutostopSerial -I./Metropolis/AutostopDomainDecomposition  -I./Metropolis
 
 SOURCES = main.cpp \
           $(foreach dir, $(SRCDIR), $(wildcard $(dir)/*.cpp))

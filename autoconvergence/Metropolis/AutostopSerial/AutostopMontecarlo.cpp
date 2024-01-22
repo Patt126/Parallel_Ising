@@ -3,33 +3,26 @@
 #include "AutostopMontecarlo.h"
 #include <cstdlib>
 #include <fstream>
+#include <condition_variable>
 
 
-AutostopMontecarlo::AutostopMontecarlo(float interactionStrength, int latticeSize,  float Tolerance, float T_MIN, float T_MAX, float T_STEP):
+AutostopMontecarlo::AutostopMontecarlo(float interactionStrength, int latticeSize, float T_MIN, float T_MAX, float T_STEP, float tolerance):
      lattice(interactionStrength, latticeSize),  
         randVect(),
         energyResults(),
         magnetizationResults(),
         monteCarloStepsResults(),
         temperatures(),
-        tolerance(Tolerance),  // Initialize tolerance with the specified value
+        tolerance(tolerance),  // Initialize tolerance with the specified value
         T_STEP(T_STEP) ,
         T_MIN(T_MIN),
         T_MAX(T_MAX),
         L(latticeSize),
-        N(latticeSize * latticeSize)
+        N(latticeSize * latticeSize),
+        rng(std::random_device{}()),
+        dist(0.0, 1.0)
 {   
-    randVect = std::make_unique<std::vector<int> >(N);
-    // Initialize randVect with createRandVect function
-    create_rand_vector();
-    // Initialize energyResults with std::make_unique       
-    energyResults = std::make_unique<std::vector<float> >();
-    // Initialize magnetizationResults with std::make_unique
-    magnetizationResults = std::make_unique<std::vector<float> >();
-    // Initialize monteCarloStepsResults with std::make_unique
-    monteCarloStepsResults = std::make_unique<std::vector<int> >();
-    // Initialize temperatures with std::make_unique
-    temperatures = std::make_unique<std::vector<float> >();                     
+  
 
 }
 
@@ -39,7 +32,7 @@ void AutostopMontecarlo::simulate_phase_transition() {
     int deltaM ;
     int step;
     float m = 0;
-    float mexact = 1;
+    float mexact ;
     float T = T_MIN;
 
     float error = 0;
@@ -53,9 +46,9 @@ void AutostopMontecarlo::simulate_phase_transition() {
         m = static_cast<float>(lattice.get_magnetization()) / N;
         error = std::abs(std::abs(m) - mexact); //evaluate error
         while (error > tolerance ) { //continue simulation until convergence criterion is met 
+            
             deltaE = 0;
             deltaM = 0; 
-            create_rand_vector();
             simulate_step(prob, lattice.get_lattice(), deltaM, deltaE);
             lattice.increment_magnetization(deltaM);
             lattice.increment_energy(deltaE);
@@ -65,11 +58,11 @@ void AutostopMontecarlo::simulate_phase_transition() {
         
         }
         //record simulation results for the current temperature
-        temperatures->emplace_back(T);
+        temperatures.emplace_back(T);
         T += T_STEP;
-        monteCarloStepsResults->emplace_back(step);
-        energyResults->emplace_back(1);
-        magnetizationResults->emplace_back(abs(m));
+        monteCarloStepsResults.emplace_back(step);
+        energyResults.emplace_back(1);
+        magnetizationResults.emplace_back(abs(m));
         step = 0;
         lattice.restore_random_lattice(); //restore the lattice to its initial state for the next temperature
     }
@@ -125,9 +118,10 @@ void AutostopMontecarlo::flip(std::vector<int>& lattice, std::array<float, 2>& p
 }
 
 
-int AutostopMontecarlo::simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E,int offset ) {
+int AutostopMontecarlo::simulate_step(std::array<float, 2> prob, std::vector<int>& lattice, int& M, int& E,const int& offset ) {
+    int n;
     for (unsigned long int i = 0; i < (N); i++) {
-        int n = (*randVect)[i];
+        n = static_cast<int>(dist(rng) * N);
         if (n != -1) {
             flip(lattice, prob, n, M, E);
         }
@@ -150,15 +144,14 @@ void AutostopMontecarlo::store_results_to_file() const {
     }
 
     // Write column headers
-    outFile << "E  M  T " << std::endl;
+    outFile << "E  M  T  N" << std::endl;
 
     // Determine the number of results to write
-    std::size_t numResults = energyResults->size(); //they all have same lenght
+    std::size_t numResults = energyResults.size(); //they all have same lenght
     // Write results to the file
     for (std::size_t i = 0; i < numResults; ++i) {
         // Write data for each row
-        outFile << (*energyResults)[i] << " " << (*magnetizationResults)[i] << " " << (*temperatures)[i] <<(*monteCarloStepsResults)[i]  << std::endl;
-
+        outFile << energyResults[i] << " " << magnetizationResults[i] << " " << temperatures[i] << " " << monteCarloStepsResults[i] << std::endl;
     }
 
     // Close the file

@@ -3,8 +3,8 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include "Metropolis/AutostopDomainDecomposition/DomainDecomposition.h"
-#include "Metropolis/AutostopSerial/AutostopMontecarlo.h"
+#include "DomainDecomposition.h"
+#include "AutostopMontecarlo.h"
 
 void store_performance_to_file(std::vector<float> time_results,int L , std::string filename) {
     std::ofstream file;
@@ -13,7 +13,6 @@ void store_performance_to_file(std::vector<float> time_results,int L , std::stri
     // Write time results and sizes to the file for the current method
     file <<"Serial: " <<time_results[0] << " s"<< std::endl;
     file <<"Domain Decompositon: " <<time_results[1] << " s"<< std::endl;
-    file <<"Sliding Window: " <<time_results[2] << " s"<< std::endl;
     file.close();
 }
 
@@ -23,12 +22,17 @@ void store_performance_to_file(std::vector<float> time_results,int L , std::stri
  */
 int main() {
     // User input variables
-    int L_MIN, L_MAX, NUMTHREAD;
-    float T_MIN, T_MAX, T_STEP, interactionStrength;
-    float tolerance;
+    int L_MIN =64;
+    int L_MAX = 128;
+    int NUMTHREAD = 16;
+    float T_MIN =0.1;
+    float T_MAX = 0.6;
+    float T_STEP = 0.1;
+    float interactionStrength = 1.0;
+    float tolerance = 0.05;
     std::string filename;
 
-    // Taking user input for variables
+   /* // Taking user input for variables
     std::cout << "Enter minimum L: ";
     std::cin >> L_MIN;
 
@@ -56,7 +60,7 @@ int main() {
 
      std::cout << "Enter filename:";
     std::cin >> filename;
-    
+    */
     std::vector<float> time_results;
 
     // Loop over lattice sizes
@@ -90,7 +94,7 @@ int main() {
 
         }
 
-
+    
         // Store performance results for all methods after completing all iterations
     store_performance_to_file(time_results, L, filename);
     time_results.clear();
