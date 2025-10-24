@@ -76,7 +76,7 @@ Example:
 ### CUDA version
 
 ```bash
-cd Test/MetropolisCuda
+cd MetropolisCuda
 nvcc -std=c++17 MetropolisCuda.cu -o MCprogram
 ./MCprogram
 ```
@@ -84,13 +84,23 @@ nvcc -std=c++17 MetropolisCuda.cu -o MCprogram
 ### Cluster Algorithms
 
 ```bash
-cd src/Wolff
+cd Wolff
 make && ./Wprogram && make clean
-cd src/SwendsenWangParallel
+cd SwendsenWangParallel
 make && ./SWprogram && make clean
 ```
 
+### Replica Exchange Method (REM)
+
+```bash
+cd src/Rem
+make
+mpirun -np <num_replicas> ./REMprogram
+make clean
+
 ---
+
+
 
 ## Visualization
 
