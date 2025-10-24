@@ -1,2 +1,0 @@
-Serial: 74 s
-Domain Decompositon: 150 s

@@ -1,2 +1,0 @@
-Serial: 0 s
-Domain Decompositon: 0 s
