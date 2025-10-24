@@ -93,10 +93,12 @@ make && ./SWprogram && make clean
 ### Replica Exchange Method (REM)
 
 ```bash
-cd src/Rem
+cd Rem
 make
 mpirun -np <num_replicas> ./REMprogram
 make clean
+```
+
 
 ---
 
