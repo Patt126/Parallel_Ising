@@ -1,6 +1,6 @@
 # Parallel 2D Ising Model Simulation and Benchmarking
 
-This project implements several parallel strategies for simulating the 2D Ising model using **C++**, integrating **MPI**, **OpenMP**, and **CUDA** backends. It models the magnetic dipole moments of atomic spins on a lattice and reproduces the phase transition of ferromagnetic materials. The repository unifies the work carried out **together** by me and colleague Luigi Pagani who explored complementary parallelization approaches.
+Parallel Ising Model Simulation — High-performance 2D Ising model in C++ with MPI, OpenMP, and CUDA backends. Simulates ferromagnetic phase transitions and critical phenomena; Nowadays, it serves as a more general paradigm applicable to modeling collective behavior in social, neural, and epidemic systems. The repository unifies the work carried out **together** by me and colleague Luigi Pagani who explored complementary parallelization approaches.
 
 ---
 
